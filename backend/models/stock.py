@@ -9,16 +9,32 @@ class StockOfTheDay(BaseModel):
     date: date
     sector: str
     industry: str
-    market_cap: Optional[float]
-    pe_ratio: Optional[float]
+    description: str
+    why_featured: str
+    mention_count: int
+
+    # Price
     current_price: float
     day_high: float
     day_low: float
     week_52_high: float
     week_52_low: float
-    description: str
-    why_featured: str
-    mention_count: int
+    price_change: Optional[float] = None
+    price_change_pct: Optional[float] = None
+
+    # Fundamentals
+    market_cap: Optional[float] = None
+    pe_ratio: Optional[float] = None
+    moving_avg_50: Optional[float] = None
+    moving_avg_200: Optional[float] = None
+
+    # Analyst ratings
+    analyst_target_price: Optional[float] = None
+    analyst_strong_buy: Optional[int] = None
+    analyst_buy: Optional[int] = None
+    analyst_hold: Optional[int] = None
+    analyst_sell: Optional[int] = None
+    analyst_strong_sell: Optional[int] = None
 
 
 class PricePoint(BaseModel):

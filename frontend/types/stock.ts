@@ -4,16 +4,32 @@ export interface StockOfTheDay {
   date: string;
   sector: string;
   industry: string;
-  market_cap: number | null;
-  pe_ratio: number | null;
+  description: string;
+  why_featured: string;
+  mention_count: number;
+
+  // Price
   current_price: number;
   day_high: number;
   day_low: number;
   week_52_high: number;
   week_52_low: number;
-  description: string;
-  why_featured: string;
-  mention_count: number;
+  price_change: number | null;
+  price_change_pct: number | null;
+
+  // Fundamentals
+  market_cap: number | null;
+  pe_ratio: number | null;
+  moving_avg_50: number | null;
+  moving_avg_200: number | null;
+
+  // Analyst ratings
+  analyst_target_price: number | null;
+  analyst_strong_buy: number | null;
+  analyst_buy: number | null;
+  analyst_hold: number | null;
+  analyst_sell: number | null;
+  analyst_strong_sell: number | null;
 }
 
 export interface PricePoint {

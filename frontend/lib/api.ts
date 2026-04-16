@@ -1,7 +1,7 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export async function getTodayStock() {
-  const res = await fetch(`${API_BASE}/api/stock/today`, { next: { revalidate: 3600 } });
+  const res = await fetch(`${API_BASE}/api/stock/today`, { next: { revalidate: 300 } });
   if (!res.ok) return null;
   return res.json();
 }

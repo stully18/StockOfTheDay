@@ -25,7 +25,7 @@ export default function ArchivePage() {
   return (
     <>
       <Navbar />
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10">
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
         {/* Header */}
         <div className="mb-6 sm:mb-8 animate-fade-up">
           <h1

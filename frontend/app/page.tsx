@@ -4,7 +4,8 @@ import Navbar from "@/components/Navbar";
 import StockChart from "@/components/StockChart";
 import StatCard from "@/components/StatCard";
 import LiveBadge from "@/components/LiveBadge";
-import { TrendingUp, Building2, BarChart3, Newspaper } from "lucide-react";
+import AnalystRatings from "@/components/AnalystRatings";
+import { TrendingUp, Building2, BarChart3 } from "lucide-react";
 
 export default async function HomePage() {
   const stock: StockOfTheDay | null = await getTodayStock();
@@ -12,7 +13,7 @@ export default async function HomePage() {
   return (
     <>
       <Navbar />
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10">
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
         {stock ? (
           <StockView stock={stock} />
         ) : (
@@ -20,7 +21,7 @@ export default async function HomePage() {
         )}
       </main>
       <footer className="border-t border-[var(--border)] py-6 text-center text-xs text-[var(--fg-subtle)]">
-        Market data via Yahoo Finance · Updated daily · For informational purposes only
+        Market data via Alpha Vantage & Yahoo Finance · Updated daily · For informational purposes only
       </footer>
     </>
   );
@@ -30,6 +31,8 @@ function StockView({ stock }: { stock: StockOfTheDay }) {
   const today = new Date(stock.date).toLocaleDateString("en-US", {
     weekday: "long", year: "numeric", month: "long", day: "numeric",
   });
+
+  const priceChangePos = (stock.price_change_pct ?? 0) >= 0;
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -56,6 +59,19 @@ function StockView({ stock }: { stock: StockOfTheDay }) {
           >
             {formatPrice(stock.current_price)}
           </p>
+          {stock.price_change_pct !== null && (
+            <p
+              className="text-sm font-medium mt-0.5"
+              style={{ color: priceChangePos ? "var(--accent-dark)" : "var(--negative)" }}
+            >
+              {priceChangePos ? "▲" : "▼"} {Math.abs(stock.price_change_pct ?? 0).toFixed(2)}%
+              {stock.price_change !== null && (
+                <span className="text-xs font-normal text-[var(--fg-muted)] ml-1">
+                  ({priceChangePos ? "+" : ""}${(stock.price_change ?? 0).toFixed(2)})
+                </span>
+              )}
+            </p>
+          )}
           <p className="text-xs text-[var(--fg-muted)] mt-0.5">
             {stock.sector} · {stock.industry}
           </p>
@@ -66,7 +82,9 @@ function StockView({ stock }: { stock: StockOfTheDay }) {
       <div className="animate-fade-up delay-200 rounded-2xl bg-[var(--accent-bg)] border border-[var(--accent)]/20 p-4 sm:p-5">
         <div className="flex items-center gap-2 mb-2">
           <TrendingUp size={14} className="text-[var(--accent)]" />
-          <span className="text-xs font-600 text-[var(--accent-dark)] uppercase tracking-wider">Why it&apos;s featured today</span>
+          <span className="text-xs font-600 text-[var(--accent-dark)] uppercase tracking-wider">
+            Why it&apos;s featured today
+          </span>
         </div>
         <p className="text-sm sm:text-base text-[var(--fg)] leading-relaxed">{stock.why_featured}</p>
         <p className="text-xs text-[var(--fg-muted)] mt-2">
@@ -79,23 +97,29 @@ function StockView({ stock }: { stock: StockOfTheDay }) {
         <StockChart ticker={stock.ticker} />
       </div>
 
-      {/* Stats Grid */}
-      <div className="animate-fade-up delay-400 grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatCard label="Day High" value={formatPrice(stock.day_high)} />
-        <StatCard label="Day Low" value={formatPrice(stock.day_low)} />
-        <StatCard label="52W High" value={formatPrice(stock.week_52_high)} />
-        <StatCard label="52W Low" value={formatPrice(stock.week_52_low)} />
-        <StatCard label="Market Cap" value={formatMarketCap(stock.market_cap)} />
-        <StatCard label="P/E Ratio" value={stock.pe_ratio ? stock.pe_ratio.toFixed(2) : "N/A"} />
-        <StatCard label="Mentions Today" value={`${stock.mention_count}×`} accent />
-        <StatCard label="Sector" value={stock.sector} sub={stock.industry} />
+      {/* Stats + Analyst layout */}
+      <div className="animate-fade-up delay-400 grid gap-3 lg:grid-cols-[3fr_2fr]">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+          <StatCard label="Day High" value={formatPrice(stock.day_high)} />
+          <StatCard label="Day Low" value={formatPrice(stock.day_low)} />
+          <StatCard label="52W High" value={formatPrice(stock.week_52_high)} />
+          <StatCard label="52W Low" value={formatPrice(stock.week_52_low)} />
+          <StatCard label="Market Cap" value={formatMarketCap(stock.market_cap)} />
+          <StatCard label="P/E Ratio" value={stock.pe_ratio ? stock.pe_ratio.toFixed(2) : "N/A"} />
+        </div>
+
+        <div className="lg:h-full">
+          <AnalystRatings stock={stock} />
+        </div>
       </div>
 
       {/* Company Overview */}
       <div className="animate-fade-up delay-500 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 sm:p-6 shadow-[var(--shadow-sm)]">
         <div className="flex items-center gap-2 mb-3">
           <Building2 size={14} className="text-[var(--fg-muted)]" />
-          <span className="text-xs font-medium text-[var(--fg-muted)] uppercase tracking-wider">About {stock.company_name}</span>
+          <span className="text-xs font-medium text-[var(--fg-muted)] uppercase tracking-wider">
+            About {stock.company_name}
+          </span>
         </div>
         <p className="text-sm sm:text-base text-[var(--fg-muted)] leading-relaxed line-clamp-6">
           {stock.description || "Company description not available."}
