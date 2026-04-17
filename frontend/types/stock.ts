@@ -1,3 +1,10 @@
+export interface Headline {
+  title: string;
+  source: string;
+  link: string;
+  published: string;
+}
+
 export interface StockOfTheDay {
   ticker: string;
   company_name: string;
@@ -30,6 +37,9 @@ export interface StockOfTheDay {
   analyst_hold: number | null;
   analyst_sell: number | null;
   analyst_strong_sell: number | null;
+
+  // News headlines
+  headlines?: Headline[];
 }
 
 export interface PricePoint {

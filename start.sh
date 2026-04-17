@@ -34,7 +34,7 @@ pip install -r requirements.txt -q
 # Copy .env if it doesn't exist
 if [ ! -f ".env" ]; then
   cp .env.example .env
-  echo -e "${YELLOW}  ⚠  Created backend/.env from .env.example — add your Reddit API keys there.${RESET}"
+  echo -e "${YELLOW}  ⚠  Created backend/.env from .env.example — add your API keys there.${RESET}"
 fi
 
 # ── Frontend .env ────────────────────────────────────────────────────────
@@ -42,6 +42,13 @@ cd "$ROOT/frontend"
 if [ ! -f ".env.local" ]; then
   cp .env.example .env.local
   echo -e "${YELLOW}  ⚠  Created frontend/.env.local from .env.example.${RESET}"
+fi
+
+# ── Frontend npm deps ────────────────────────────────────────────────────
+cd "$ROOT/frontend"
+if [ ! -d "node_modules" ]; then
+  echo -e "${YELLOW}→ Installing frontend dependencies (npm install)...${RESET}"
+  npm install
 fi
 
 echo ""

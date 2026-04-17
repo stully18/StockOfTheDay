@@ -174,10 +174,11 @@ async def fetch_feed(name: str, url: str) -> List[dict]:
         return []
 
 
-async def scrape_all_feeds() -> Tuple[str, int, List[dict]]:
+async def scrape_all_feeds() -> Tuple[Counter, List[dict]]:
     """
     Scrape all RSS feeds, tally ticker mentions,
-    and return (top_ticker, mention_count, articles).
+    and return (ticker_counts, all_articles).
+    Top-ticker selection is left to the caller so signals can be merged first.
     """
     import asyncio
     tasks = [fetch_feed(name, url) for name, url in RSS_FEEDS.items()]
@@ -191,8 +192,4 @@ async def scrape_all_feeds() -> Tuple[str, int, List[dict]]:
         for ticker in extract_tickers(combined):
             ticker_counts[ticker] += 1
 
-    if not ticker_counts:
-        return ("NVDA", 0, all_articles)
-
-    top_ticker, count = ticker_counts.most_common(1)[0]
-    return (top_ticker, count, all_articles)
+    return (ticker_counts, all_articles)

@@ -1,10 +1,12 @@
-import { getTodayStock, formatMarketCap, formatPrice } from "@/lib/api";
+import { getTodayStock } from "@/lib/api";
 import { StockOfTheDay } from "@/types/stock";
 import Navbar from "@/components/Navbar";
 import StockChart from "@/components/StockChart";
-import StatCard from "@/components/StatCard";
 import LiveBadge from "@/components/LiveBadge";
 import AnalystRatings from "@/components/AnalystRatings";
+import NewsHeadlines from "@/components/NewsHeadlines";
+import AnimatedPrice from "@/components/AnimatedPrice";
+import KeyStatistics from "@/components/KeyStatistics";
 import { TrendingUp, Building2, BarChart3 } from "lucide-react";
 
 export default async function HomePage() {
@@ -13,14 +15,14 @@ export default async function HomePage() {
   return (
     <>
       <Navbar />
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+      <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-10 py-8 sm:py-12">
         {stock ? (
           <StockView stock={stock} />
         ) : (
           <EmptyState />
         )}
       </main>
-      <footer className="border-t border-[var(--border)] py-6 text-center text-xs text-[var(--fg-subtle)]">
+      <footer className="mt-auto bg-[var(--surface-container-low)] py-8 text-center text-[11px] text-[var(--on-surface-variant)]">
         Market data via Alpha Vantage & Yahoo Finance · Updated daily · For informational purposes only
       </footer>
     </>
@@ -29,101 +31,109 @@ export default async function HomePage() {
 
 function StockView({ stock }: { stock: StockOfTheDay }) {
   const today = new Date(stock.date).toLocaleDateString("en-US", {
-    weekday: "long", year: "numeric", month: "long", day: "numeric",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 
-  const priceChangePos = (stock.price_change_pct ?? 0) >= 0;
-
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Header */}
-      <div className="animate-fade-up flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-        <div>
-          <p className="text-xs font-medium text-[var(--fg-muted)] uppercase tracking-widest mb-1">{today}</p>
-          <div className="flex items-baseline gap-3 flex-wrap">
-            <h1
+    <div className="space-y-8 sm:space-y-10">
+      {/* Hero — ticker + live price grouped (no wide empty gutter) */}
+      <div className="animate-fade-up flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8 xl:gap-10">
+        <div className="min-w-0 flex-1 space-y-3 lg:max-w-3xl">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center rounded-full bg-[var(--surface-container)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--on-surface-variant)]">
+              Stock of the Day
+            </span>
+            <span className="text-xs font-medium text-[var(--fg-subtle)] tabular-nums">{today}</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <span
               style={{ fontFamily: "var(--font-display)" }}
-              className="text-4xl sm:text-5xl font-800 text-[var(--fg)] tracking-tight"
+              className="text-3xl sm:text-4xl font-bold text-[var(--primary)] tracking-tight"
             >
               {stock.ticker}
-            </h1>
+            </span>
             <LiveBadge />
           </div>
-          <p className="text-sm sm:text-base text-[var(--fg-muted)] mt-1">{stock.company_name}</p>
+          <h1
+            style={{ fontFamily: "var(--font-display)" }}
+            className="text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--on-surface)] tracking-tight leading-[1.2]"
+          >
+            {stock.company_name}
+          </h1>
+          <p className="text-sm text-[var(--on-surface-variant)] max-w-xl leading-relaxed">
+            {stock.sector} · {stock.industry}. Featured from today&apos;s cross-market mention data.
+          </p>
         </div>
 
-        <div className="text-left sm:text-right animate-fade-up delay-100">
-          <p
-            style={{ fontFamily: "var(--font-display)" }}
-            className="text-3xl sm:text-4xl font-700 text-[var(--fg)]"
+        <div className="w-full shrink-0 sm:max-w-md lg:w-[min(100%,19.5rem)] lg:max-w-none">
+          <div
+            className="rounded-lg bg-[var(--surface-container-high)] p-4 sm:p-5 transition-colors duration-200 hover:bg-[var(--surface-container-highest)]"
+            style={{ boxShadow: "inset 4px 0 0 0 var(--primary)" }}
           >
-            {formatPrice(stock.current_price)}
-          </p>
-          {stock.price_change_pct !== null && (
-            <p
-              className="text-sm font-medium mt-0.5"
-              style={{ color: priceChangePos ? "var(--accent-dark)" : "var(--negative)" }}
-            >
-              {priceChangePos ? "▲" : "▼"} {Math.abs(stock.price_change_pct ?? 0).toFixed(2)}%
-              {stock.price_change !== null && (
-                <span className="text-xs font-normal text-[var(--fg-muted)] ml-1">
-                  ({priceChangePos ? "+" : ""}${(stock.price_change ?? 0).toFixed(2)})
-                </span>
-              )}
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--on-surface-variant)] mb-2">
+              Live price
             </p>
-          )}
-          <p className="text-xs text-[var(--fg-muted)] mt-0.5">
-            {stock.sector} · {stock.industry}
-          </p>
+            <AnimatedPrice
+              price={stock.current_price}
+              priceChange={stock.price_change}
+              priceChangePct={stock.price_change_pct}
+              sector={stock.sector}
+              industry={stock.industry}
+              showMeta={false}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Why Featured */}
-      <div className="animate-fade-up delay-200 rounded-2xl bg-[var(--accent-bg)] border border-[var(--accent)]/20 p-4 sm:p-5">
-        <div className="flex items-center gap-2 mb-2">
-          <TrendingUp size={14} className="text-[var(--accent)]" />
-          <span className="text-xs font-600 text-[var(--accent-dark)] uppercase tracking-wider">
+      {/* Featured narrative */}
+      <div className="animate-fade-up delay-200 why-featured-card rounded-lg bg-[var(--surface-container-low)] p-5 sm:p-6 lg:p-8">
+        <div className="flex items-center gap-2 mb-4">
+          <TrendingUp size={15} className="text-[var(--primary)]" strokeWidth={2} />
+          <span className="text-xs font-semibold text-[var(--primary)] uppercase tracking-[0.14em]">
             Why it&apos;s featured today
           </span>
         </div>
-        <p className="text-sm sm:text-base text-[var(--fg)] leading-relaxed">{stock.why_featured}</p>
-        <p className="text-xs text-[var(--fg-muted)] mt-2">
-          Mentioned across <strong>{stock.mention_count}</strong> news items today
+        <p className="text-sm sm:text-base text-[var(--on-surface)] leading-relaxed max-w-4xl">
+          {stock.why_featured}
+        </p>
+        <p className="text-xs text-[var(--on-surface-variant)] mt-4">
+          Mentioned across <strong className="text-[var(--on-surface)]">{stock.mention_count}</strong> news
+          items today
         </p>
       </div>
 
-      {/* Chart */}
-      <div className="animate-fade-up delay-300">
-        <StockChart ticker={stock.ticker} />
+      {/* Performance + key stats — equal height on large screens */}
+      <div className="animate-fade-up delay-300 grid lg:grid-cols-12 gap-3 lg:gap-4 lg:items-stretch">
+        <div className="lg:col-span-8 min-w-0 flex min-h-0">
+          <StockChart ticker={stock.ticker} />
+        </div>
+        <div className="lg:col-span-4 min-w-0 flex min-h-0">
+          <KeyStatistics stock={stock} />
+        </div>
       </div>
 
-      {/* Stats + Analyst layout */}
-      <div className="animate-fade-up delay-400 grid gap-3 lg:grid-cols-[3fr_2fr]">
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-          <StatCard label="Day High" value={formatPrice(stock.day_high)} />
-          <StatCard label="Day Low" value={formatPrice(stock.day_low)} />
-          <StatCard label="52W High" value={formatPrice(stock.week_52_high)} />
-          <StatCard label="52W Low" value={formatPrice(stock.week_52_low)} />
-          <StatCard label="Market Cap" value={formatMarketCap(stock.market_cap)} />
-          <StatCard label="P/E Ratio" value={stock.pe_ratio ? stock.pe_ratio.toFixed(2) : "N/A"} />
-        </div>
-
-        <div className="lg:h-full">
+      {/* Analyst + company & news */}
+      <div className="animate-fade-up delay-400 grid lg:grid-cols-12 gap-3 lg:gap-4 items-start">
+        <div className="lg:col-span-5">
           <AnalystRatings stock={stock} />
         </div>
-      </div>
-
-      {/* Company Overview */}
-      <div className="animate-fade-up delay-500 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 sm:p-6 shadow-[var(--shadow-sm)]">
-        <div className="flex items-center gap-2 mb-3">
-          <Building2 size={14} className="text-[var(--fg-muted)]" />
-          <span className="text-xs font-medium text-[var(--fg-muted)] uppercase tracking-wider">
-            About {stock.company_name}
-          </span>
+        <div className="lg:col-span-7 space-y-4">
+          <div className="rounded-lg bg-[var(--surface-container)] p-5 sm:p-6 transition-colors duration-200 hover:bg-[var(--surface-container-high)]">
+            <div className="flex items-center gap-2 mb-4">
+              <Building2 size={14} className="text-[var(--on-surface-variant)]" />
+              <span className="text-xs font-semibold text-[var(--on-surface-variant)] uppercase tracking-[0.14em]">
+                About {stock.company_name}
+              </span>
+            </div>
+            <p className="text-sm sm:text-base text-[var(--on-surface-variant)] leading-relaxed line-clamp-8">
+              {stock.description || "Company description not available."}
+            </p>
+          </div>
+          {stock.headlines && stock.headlines.length > 0 && <NewsHeadlines headlines={stock.headlines} />}
         </div>
-        <p className="text-sm sm:text-base text-[var(--fg-muted)] leading-relaxed line-clamp-6">
-          {stock.description || "Company description not available."}
-        </p>
       </div>
     </div>
   );
@@ -132,13 +142,16 @@ function StockView({ stock }: { stock: StockOfTheDay }) {
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center animate-fade-in">
-      <div className="w-14 h-14 rounded-2xl bg-[var(--accent-bg)] flex items-center justify-center mb-4">
-        <BarChart3 size={24} className="text-[var(--accent)]" />
+      <div className="w-14 h-14 rounded-lg bg-[var(--surface-container-high)] flex items-center justify-center mb-5">
+        <BarChart3 size={24} className="text-[var(--primary)]" />
       </div>
-      <h2 style={{ fontFamily: "var(--font-display)" }} className="text-xl font-700 text-[var(--fg)] mb-2">
-        No stock selected yet
+      <h2
+        style={{ fontFamily: "var(--font-display)" }}
+        className="text-xl font-bold text-[var(--on-surface)] mb-2"
+      >
+        Vault empty
       </h2>
-      <p className="text-sm text-[var(--fg-muted)] max-w-xs">
+      <p className="text-sm text-[var(--on-surface-variant)] max-w-sm">
         The daily scraper hasn&apos;t run yet. Check back soon — a new stock will be featured shortly.
       </p>
     </div>

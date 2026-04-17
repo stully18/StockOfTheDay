@@ -17,6 +17,8 @@ build/
 
 # Backend cache & runtime data
 backend/data/av_cache.json
+backend/data/today.json
+backend/data/archive/
 
 # Node / Next.js
 node_modules/
