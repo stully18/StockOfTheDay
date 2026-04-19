@@ -1,34 +1,54 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&display=swap');
 @import "tailwindcss";
 
+/* The Precision Vault — design tokens */
 :root {
-  /* Core palette */
-  --bg: #f7f6f2;
-  --bg-card: #ffffff;
-  --fg: #0d0d0d;
-  --fg-muted: #6b6b6b;
-  --fg-subtle: #a8a8a8;
-  --accent: #00c896;
-  --accent-dark: #00a87e;
-  --accent-bg: #e6faf5;
-  --negative: #ff4d4d;
-  --negative-bg: #fff0f0;
-  --border: #e8e6e0;
-  --border-strong: #d4d0c8;
+  --surface: #0b1326;
+  --surface-container-low: #131b2e;
+  --surface-container: #171f33;
+  --surface-container-high: #222a3d;
+  --surface-container-highest: #2d3449;
+  --surface-container-lowest: #060e20;
+  --surface-bright: #31394d;
 
-  /* Typography */
-  --font-display: 'Syne', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
+  --primary: #75ff9e;
+  --primary-container: #00e676;
+  --on-primary: #003918;
+  --secondary-container: #3a4a5f;
+  --on-secondary-container: #a9bad3;
+  --on-surface: #dfe6ee;
+  --on-surface-variant: #bacbb9;
+  --outline-variant: #3b4a3d;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
-  --shadow-lg: 0 12px 40px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.06);
+  --negative: #f87171;
+  --negative-muted: color-mix(in srgb, var(--negative) 22%, transparent);
+
+  /* Aliases — map legacy var names */
+  --bg: var(--surface);
+  --bg-card: var(--surface-container-high);
+  --bg-elevated: var(--surface-container);
+  --fg: var(--on-surface);
+  --fg-muted: color-mix(in srgb, var(--on-surface) 58%, transparent);
+  --fg-subtle: color-mix(in srgb, var(--on-surface) 40%, transparent);
+  --accent: var(--primary);
+  --accent-dark: var(--primary-container);
+  --accent-bg: color-mix(in srgb, var(--primary) 12%, var(--surface-container-low));
+  --negative-bg: color-mix(in srgb, var(--negative) 10%, var(--surface-container-low));
+  --ghost-border: color-mix(in srgb, var(--outline-variant) 20%, transparent);
+  --border: var(--ghost-border);
+  --border-strong: color-mix(in srgb, var(--outline-variant) 32%, transparent);
+
+  --shadow-ambient: 0 24px 48px rgba(6, 14, 32, 0.4);
+  --shadow-sm: 0 8px 24px rgba(6, 14, 32, 0.25);
+
+  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%);
+
+  --font-display: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 @theme inline {
-  --color-background: var(--bg);
-  --color-foreground: var(--fg);
+  --color-background: var(--surface);
+  --color-foreground: var(--on-surface);
   --font-sans: var(--font-body);
 }
 
@@ -42,47 +62,166 @@ html {
 }
 
 body {
-  background: var(--bg);
-  color: var(--fg);
+  background: var(--surface);
+  color: var(--on-surface);
   font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.6;
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--fg-muted); }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-container-low);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--secondary-container);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--on-secondary-container);
+}
 
-/* Selection */
-::selection { background: var(--accent); color: #fff; }
+::selection {
+  background: color-mix(in srgb, var(--primary) 35%, transparent);
+  color: var(--on-surface);
+}
 
-/* Animations */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes ticker {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.4; transform: scale(0.75); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.75);
+  }
 }
 
-.animate-fade-up   { animation: fadeUp 0.5s ease both; }
-.animate-fade-in   { animation: fadeIn 0.4s ease both; }
-.animate-ticker    { animation: ticker 30s linear infinite; }
-.animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+@keyframes shimmerPass {
+  from {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  to {
+    transform: translateX(350%) skewX(-18deg);
+  }
+}
+.price-shimmer-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--primary) 28%, transparent) 45%,
+    color-mix(in srgb, var(--on-surface) 15%, transparent) 50%,
+    color-mix(in srgb, var(--primary) 18%, transparent) 55%,
+    transparent 100%
+  );
+  animation: shimmerPass 0.65s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+}
 
-.delay-100 { animation-delay: 0.1s; }
-.delay-200 { animation-delay: 0.2s; }
-.delay-300 { animation-delay: 0.3s; }
-.delay-400 { animation-delay: 0.4s; }
-.delay-500 { animation-delay: 0.5s; }
+@keyframes featuredGlow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.92;
+  }
+}
+.why-featured-card {
+  animation: featuredGlow 4s ease-in-out infinite;
+}
+
+.glass-header {
+  background: color-mix(in srgb, var(--surface-bright) 55%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.btn-primary-vault {
+  background: var(--gradient-primary);
+  color: var(--on-primary);
+  font-weight: 700;
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.5s ease both;
+}
+.animate-fade-in {
+  animation: fadeIn 0.4s ease both;
+}
+.animate-ticker {
+  animation: ticker 30s linear infinite;
+}
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.delay-100 {
+  animation-delay: 0.1s;
+}
+.delay-200 {
+  animation-delay: 0.2s;
+}
+.delay-300 {
+  animation-delay: 0.3s;
+}
+.delay-400 {
+  animation-delay: 0.4s;
+}
+.delay-500 {
+  animation-delay: 0.5s;
+}
+.delay-600 {
+  animation-delay: 0.6s;
+}
+.delay-700 {
+  animation-delay: 0.7s;
+}
+
+.stat-card {
+  background: var(--surface-container);
+  transition: background-color 0.2s ease;
+}
+.stat-card:hover {
+  background: var(--surface-container-high);
+}
+.stat-card-accent {
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface-container));
+  transition: background-color 0.2s ease;
+}
+.stat-card-accent:hover {
+  background: color-mix(in srgb, var(--primary) 16%, var(--surface-container-high));
+}
