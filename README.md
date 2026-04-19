@@ -2,6 +2,8 @@
 
 > One stock. Every weekday. Automatically selected, AI-explained, and ready before the market opens.
 
+![screenshot](public/screenshot.png)
+
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js) ![FastAPI](https://img.shields.io/badge/FastAPI-Python-009688?logo=fastapi) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38bdf8?logo=tailwindcss) ![Gemini AI](https://img.shields.io/badge/Gemini-2.5_Flash-8b5cf6?logo=google)
 
 ---
