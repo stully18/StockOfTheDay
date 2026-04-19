@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useState, useEffect, useRef, useLayoutEffect, useMemo } from "react";
 import {
   AreaChart,
   Area,
@@ -80,22 +80,64 @@ export default function StockChart({ ticker }: Props) {
   const minPrice = prices.length ? Math.min(...prices) : 0;
   const maxPrice = prices.length ? Math.max(...prices) : 0;
 
-  const formatLabel = (ts: string) => {
-    const d = new Date(ts);
+  const toTimestamp = (ts: string) => {
+    const ms = new Date(ts).getTime();
+    return Number.isNaN(ms) ? 0 : ms;
+  };
+
+  const formatXAxisTick = (value: number) => {
+    const d = new Date(value);
     if (period === "1d") return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     if (period === "5d") return d.toLocaleDateString([], { month: "short", day: "numeric" });
-    if (period === "5y") return d.toLocaleDateString([], { month: "short", year: "2-digit" });
+    if (period === "1y") return d.toLocaleDateString([], { month: "short" });
+    if (period === "5y") return String(d.getFullYear());
     return d.toLocaleDateString([], { month: "short", day: "numeric" });
   };
 
-  const chartData = data.map((d) => ({
-    time: formatLabel(d.timestamp),
+  const chartData = data.map((d, index) => ({
+    idx: index,
+    time: toTimestamp(d.timestamp),
+    timeLabel: formatXAxisTick(toTimestamp(d.timestamp)),
     price: d.close,
     open: d.open,
     high: d.high,
     low: d.low,
     volume: d.volume,
   }));
+
+  const timeTicks = useMemo(() => {
+    if (chartData.length < 2 || (period !== "1y" && period !== "5y")) return undefined;
+
+    const min = chartData[0]?.time ?? 0;
+    const max = chartData[chartData.length - 1]?.time ?? 0;
+    if (!min || !max || max <= min) return undefined;
+
+    const ticks: number[] = [];
+    const cursor = new Date(min);
+    cursor.setHours(0, 0, 0, 0);
+
+    if (period === "1y") {
+      cursor.setDate(1);
+      while (cursor.getTime() <= max) {
+        ticks.push(cursor.getTime());
+        cursor.setMonth(cursor.getMonth() + 1);
+      }
+    } else {
+      cursor.setMonth(0, 1);
+      while (cursor.getTime() <= max) {
+        ticks.push(cursor.getTime());
+        cursor.setFullYear(cursor.getFullYear() + 1);
+      }
+    }
+
+    return ticks.length > 1 ? ticks : undefined;
+  }, [chartData, period]);
+
+  const xTickCount =
+    period === "5y" ? 6 : period === "1y" ? 7 : period === "6mo" ? 5 : period === "1mo" ? 4 : 8;
+  const xMinTickGap =
+    period === "5y" ? 28 : period === "1y" ? 20 : period === "6mo" ? 18 : period === "1mo" ? 22 : 12;
+  const useTradingSessionSpacing = period === "1mo";
 
   return (
     <div className="rounded-lg bg-[var(--surface-container)] flex flex-col w-full flex-1 min-h-[380px] lg:min-h-[28rem] p-3 sm:p-4 transition-colors duration-200 hover:bg-[var(--surface-container-high)]">
@@ -169,7 +211,7 @@ export default function StockChart({ ticker }: Props) {
           <ResponsiveContainer width="100%" height={plotHeight}>
             <AreaChart
               data={chartData}
-              margin={{ top: 6, right: 6, left: 0, bottom: 10 }}
+              margin={{ top: 6, right: 8, left: 2, bottom: 16 }}
             >
               <defs>
                 <linearGradient id="priceGrad" x1="0" y1="0" x2="0" y2="1">
@@ -183,21 +225,28 @@ export default function StockChart({ ticker }: Props) {
                 vertical={false}
               />
               <XAxis
-                dataKey="time"
-                tick={{ fontSize: 10, fill: "var(--fg-subtle)" }}
+                dataKey={useTradingSessionSpacing ? "timeLabel" : "time"}
+                type={useTradingSessionSpacing ? "category" : "number"}
+                scale={useTradingSessionSpacing ? "point" : "time"}
+                domain={useTradingSessionSpacing ? undefined : ["dataMin", "dataMax"]}
+                tick={{ fontSize: 14, fill: "var(--fg-subtle)" }}
                 tickLine={false}
                 axisLine={false}
-                interval="preserveStartEnd"
-                tickMargin={8}
+                tickFormatter={useTradingSessionSpacing ? undefined : formatXAxisTick}
+                ticks={useTradingSessionSpacing ? undefined : timeTicks}
+                tickCount={xTickCount}
+                minTickGap={xMinTickGap}
+                tickMargin={12}
+                height={36}
               />
               <YAxis
                 domain={[minPrice * 0.997, maxPrice * 1.003]}
-                tick={{ fontSize: 10, fill: "var(--fg-subtle)" }}
+                tick={{ fontSize: 14, fill: "var(--fg-subtle)" }}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(v) => `$${Number(v).toFixed(0)}`}
-                width={48}
-                tickMargin={6}
+                width={56}
+                tickMargin={10}
               />
               <Tooltip
                 contentStyle={{
@@ -208,6 +257,14 @@ export default function StockChart({ ticker }: Props) {
                   boxShadow: "var(--shadow-ambient)",
                 }}
                 labelStyle={{ color: "var(--on-surface-variant)", marginBottom: 4 }}
+                labelFormatter={(value) => {
+                  const d = new Date(value as number);
+                  return d.toLocaleDateString([], {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  });
+                }}
                 formatter={(v: unknown) => {
                   const val = v as number;
                   const diff = val - firstPrice;
