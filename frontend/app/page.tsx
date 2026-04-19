@@ -115,7 +115,7 @@ function StockView({ stock }: { stock: StockOfTheDay }) {
         </div>
       </div>
 
-      {/* Analyst + company & news */}
+      {/* Analyst on left, company + market intelligence on right */}
       <div className="animate-fade-up delay-400 grid lg:grid-cols-12 gap-3 lg:gap-4 items-start">
         <div className="lg:col-span-5">
           <AnalystRatings stock={stock} />
@@ -132,7 +132,9 @@ function StockView({ stock }: { stock: StockOfTheDay }) {
               {stock.description || "Company description not available."}
             </p>
           </div>
-          {stock.headlines && stock.headlines.length > 0 && <NewsHeadlines headlines={stock.headlines} />}
+          {stock.headlines && stock.headlines.length > 0 && (
+            <NewsHeadlines headlines={stock.headlines.slice(0, 3)} />
+          )}
         </div>
       </div>
     </div>

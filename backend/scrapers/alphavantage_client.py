@@ -100,6 +100,7 @@ def get_overview(ticker: str) -> dict:
         result = {
             "company_name":        data.get("Name", ticker.upper()),
             "description":         data.get("Description", ""),
+            "exchange":            data.get("Exchange", ""),
             "sector":              data.get("Sector", "Unknown").title(),
             "industry":            data.get("Industry", "Unknown").title(),
             "market_cap":          _float(data.get("MarketCapitalization")),

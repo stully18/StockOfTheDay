@@ -59,7 +59,7 @@ def _build_prompt(
             f"{analyst_sell or 0} Sell, {analyst_strong_sell or 0} Strong Sell "
             f"({bullish}/{total_analysts} bullish)\n"
         )
-        if analyst_target_price:
+        if analyst_target_price and current_price > 0:
             upside = ((analyst_target_price - current_price) / current_price) * 100
             analyst_block += f"- Consensus price target: ${analyst_target_price:.2f} ({upside:+.1f}% from current)\n"
 
