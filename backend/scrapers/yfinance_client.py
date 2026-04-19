@@ -11,6 +11,7 @@ PERIOD_INTERVAL = {
     "3mo": "1d",
     "6mo": "1d",
     "1y":  "1wk",
+    "5y":  "1mo",
 }
 
 CHART_BASE = "https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"

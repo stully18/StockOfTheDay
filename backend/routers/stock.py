@@ -30,7 +30,7 @@ def get_chart(
     period: str = "1mo",
 ):
     """Return OHLCV price history for charting (Yahoo Finance chart API)."""
-    allowed_periods = {"1d", "5d", "1mo", "3mo", "6mo", "1y"}
+    allowed_periods = {"1d", "5d", "1mo", "3mo", "6mo", "1y", "5y"}
     if period not in allowed_periods:
         raise HTTPException(status_code=400, detail=f"Period must be one of {allowed_periods}")
     history = get_price_history(ticker, period=period)

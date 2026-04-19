@@ -19,6 +19,7 @@ const PERIODS = [
   { label: "3M", value: "3mo" },
   { label: "6M", value: "6mo" },
   { label: "1Y", value: "1y" },
+  { label: "5Y", value: "5y" },
 ];
 
 interface Props {
@@ -83,6 +84,7 @@ export default function StockChart({ ticker }: Props) {
     const d = new Date(ts);
     if (period === "1d") return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     if (period === "5d") return d.toLocaleDateString([], { month: "short", day: "numeric" });
+    if (period === "5y") return d.toLocaleDateString([], { month: "short", year: "2-digit" });
     return d.toLocaleDateString([], { month: "short", day: "numeric" });
   };
 
