@@ -73,7 +73,6 @@ async def run_daily_scrape() -> dict:
             mention_count = c
             break
     if ticker is None:
-        # All top tickers are on cooldown — just use #1
         ticker, mention_count = combined.most_common(1)[0]
         logger.warning("All top tickers on cooldown — cooldown bypassed, using #1: %s", ticker)
 
