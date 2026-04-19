@@ -50,6 +50,7 @@
 - **Branches:** `main` (production-ready) and `dev` (all active development)
 - **All work happens on the `dev` branch only** — never commit directly to `main`
 - Do not create additional feature branches unless explicitly asked
+- **At the start of every conversation, before touching any code, run `git checkout dev && git pull origin dev` to ensure the local branch is up to date.**
 
 ---
 
