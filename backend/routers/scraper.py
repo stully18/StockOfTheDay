@@ -298,6 +298,18 @@ async def run_daily_scrape() -> dict:
     6. Collect top 5 headlines mentioning the selected ticker
     7. Archive previous day, save today.json
     """
+    # Idempotency guard: skip if today.json already contains today's date
+    today_str = str(date.today())
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE) as f:
+                existing = json.load(f)
+            if existing.get("date") == today_str:
+                logger.info("Scrape already ran today (%s); skipping duplicate run.", today_str)
+                return {"status": "skipped", "reason": "already ran today", "ticker": existing.get("ticker")}
+        except Exception:
+            pass
+
     # Step 1: RSS
     ticker_counts, all_articles = await scrape_all_feeds()
 
@@ -374,10 +386,21 @@ async def run_daily_scrape() -> dict:
             break
 
     if ticker is None:
-        ticker = "BA"
-        mention_count = combined.get("BA", 0)
-        selected_overview = get_overview(ticker)
-        logger.warning("No suitable candidate found; deterministic fallback to %s", ticker)
+        # Hard fallback: pick any candidate not in recent cooldown, ignoring quality gates
+        recent = _recent_tickers(COOLDOWN_DAYS)
+        for t, c in combined.most_common():
+            if t not in recent:
+                overview = get_overview(t)
+                if overview:
+                    ticker = t
+                    mention_count = c
+                    selected_overview = overview
+                    logger.warning("Emergency fallback (ignoring quality): %s", ticker)
+                    break
+
+    if ticker is None:
+        logger.error("No suitable candidate found after all fallbacks; aborting scrape.")
+        return {"status": "error", "reason": "no suitable candidate found"}
 
     logger.info("Selected ticker: %s  (combined score: %d)", ticker, mention_count)
 
@@ -445,15 +468,26 @@ async def run_daily_scrape() -> dict:
             for _, article in relaxed[:3]
         ]
 
-    # Step 7: archive previous day
+    # Step 7: archive previous day (skip if same ticker repeated)
     if os.path.exists(DATA_FILE):
         try:
             with open(DATA_FILE) as f:
                 prev = json.load(f)
-            os.makedirs(ARCHIVE_DIR, exist_ok=True)
-            archive_path = os.path.join(ARCHIVE_DIR, f"{prev.get('date', 'unknown')}.json")
-            with open(archive_path, "w") as f:
-                json.dump(prev, f)
+            prev_date = prev.get("date", "unknown")
+            prev_ticker = prev.get("ticker")
+            if prev_date != today_str:
+                if prev_ticker == ticker:
+                    logger.warning(
+                        "Selected ticker %s matches previous day (%s); archiving but flagging repeat.",
+                        ticker, prev_date,
+                    )
+                os.makedirs(ARCHIVE_DIR, exist_ok=True)
+                archive_path = os.path.join(ARCHIVE_DIR, f"{prev_date}.json")
+                if not os.path.exists(archive_path):
+                    with open(archive_path, "w") as f:
+                        json.dump(prev, f)
+                else:
+                    logger.info("Archive entry for %s already exists; skipping overwrite.", prev_date)
         except Exception:
             pass
 
