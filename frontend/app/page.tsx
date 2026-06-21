@@ -8,6 +8,7 @@ import NewsHeadlines from "@/components/NewsHeadlines";
 import AnimatedPrice from "@/components/AnimatedPrice";
 import KeyStatistics from "@/components/KeyStatistics";
 import { TrendingUp, Building2, BarChart3 } from "lucide-react";
+import BrokerLinks from "@/components/BrokerLinks";
 
 export default async function HomePage() {
   const stock: StockOfTheDay | null = await getTodayStock();
@@ -105,8 +106,13 @@ function StockView({ stock }: { stock: StockOfTheDay }) {
         </p>
       </div>
 
+      {/* Where to trade */}
+      <div className="animate-fade-up delay-300">
+        <BrokerLinks ticker={stock.ticker} price={stock.current_price} />
+      </div>
+
       {/* Performance + key stats — equal height on large screens */}
-      <div className="animate-fade-up delay-300 grid lg:grid-cols-12 gap-3 lg:gap-4 lg:items-stretch">
+      <div className="animate-fade-up delay-400 grid lg:grid-cols-12 gap-3 lg:gap-4 lg:items-stretch">
         <div className="lg:col-span-8 min-w-0 flex min-h-0">
           <StockChart ticker={stock.ticker} />
         </div>
@@ -116,7 +122,7 @@ function StockView({ stock }: { stock: StockOfTheDay }) {
       </div>
 
       {/* Analyst on left, company + market intelligence on right */}
-      <div className="animate-fade-up delay-400 grid lg:grid-cols-12 gap-3 lg:gap-4 items-start">
+      <div className="animate-fade-up delay-500 grid lg:grid-cols-12 gap-3 lg:gap-4 items-start">
         <div className="lg:col-span-5">
           <AnalystRatings stock={stock} />
         </div>
